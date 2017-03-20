@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// scalastyle:off
-package com.databricks.spark.avro
+package com.databricks.spark.avro.clone
 
 import java.nio.ByteBuffer
 import java.util.HashMap
@@ -28,6 +27,8 @@ import org.apache.avro.SchemaBuilder._
 import org.apache.avro.Schema.Type._
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types._
+
+// scalastyle:off
 
 /**
  * This object contains method that are used to convert sparkSQL schemas to avro schemas and vice
@@ -225,6 +226,7 @@ object SchemaConverters {
       case BinaryType => schemaBuilder.bytesType()
       case BooleanType => schemaBuilder.booleanType()
       case TimestampType => schemaBuilder.longType()
+      case DateType => schemaBuilder.longType()
 
       case ArrayType(elementType, _) =>
         val builder = getSchemaBuilder(dataType.asInstanceOf[ArrayType].containsNull)
@@ -268,6 +270,7 @@ object SchemaConverters {
       case BinaryType => newFieldBuilder.bytesType()
       case BooleanType => newFieldBuilder.booleanType()
       case TimestampType => newFieldBuilder.longType()
+      case DateType => newFieldBuilder.longType()
 
       case ArrayType(elementType, _) =>
         val builder = getSchemaBuilder(dataType.asInstanceOf[ArrayType].containsNull)
@@ -297,4 +300,3 @@ object SchemaConverters {
     }
   }
 }
-// scalastyle:on

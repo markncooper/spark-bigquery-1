@@ -17,7 +17,8 @@
 
 package com.spotify.spark
 
-import com.databricks.spark.avro._
+import com.databricks.spark.avro.clone._
+import com.databricks.spark.avro.clone.SchemaConverters
 import com.google.api.services.bigquery.model.TableReference
 import com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem
 import com.google.cloud.hadoop.io.bigquery._
