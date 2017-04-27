@@ -19,7 +19,7 @@ package com.spotify.spark
 
 import com.databricks.spark.avro.clone._
 import com.databricks.spark.avro.clone.SchemaConverters
-import com.google.api.services.bigquery.model.TableReference
+import com.google.api.services.bigquery.model.{TableReference, TableSchema}
 import com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem
 import com.google.cloud.hadoop.io.bigquery._
 import org.apache.avro.Schema
@@ -149,16 +149,26 @@ package object bigquery {
     sqlContext.setConf("spark.sql.avro.compression.codec", "deflate")
 
     /**
+      * Check for existence of a table.
+      * @param tableRef
+      * @return
+      */
+    def bigQueryTableExists(tableRef: TableReference): Boolean = {
+      bq.tableExists(tableRef)
+    }
+
+    /**
      * Save a [[DataFrame]] to a BigQuery table.
      */
     def saveAsBigQueryTable(tableRef: TableReference,
                             writeDisposition: WriteDisposition.Value,
-                            createDisposition: CreateDisposition.Value): Unit = {
+                            createDisposition: CreateDisposition.Value,
+                            schema: TableSchema): Unit = {
       val bucket = conf.get(BigQueryConfiguration.GCS_BUCKET_KEY)
       val temp = s"spark-bigquery-${System.currentTimeMillis()}=${Random.nextInt(Int.MaxValue)}"
       val gcsPath = s"gs://$bucket/hadoop/tmp/spark-bigquery/$temp"
       self.write.avro(gcsPath)
-      val df = bq.load(gcsPath, tableRef, writeDisposition, createDisposition)
+      val df = bq.load(gcsPath, tableRef, writeDisposition, createDisposition, schema)
       delete(new Path(gcsPath))
       df
     }
@@ -168,11 +178,13 @@ package object bigquery {
      */
     def saveAsBigQueryTable(tableSpec: String,
                             writeDisposition: WriteDisposition.Value = null,
-                            createDisposition: CreateDisposition.Value = null): Unit =
+                            createDisposition: CreateDisposition.Value = null,
+                            schema: TableSchema = null): Unit =
       saveAsBigQueryTable(
         BigQueryStrings.parseTableReference(tableSpec),
         writeDisposition,
-        createDisposition)
+        createDisposition,
+        schema)
 
     private def delete(path: Path): Unit = {
       val fs = FileSystem.get(path.toUri, conf)

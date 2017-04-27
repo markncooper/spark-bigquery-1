@@ -1,1 +1,1 @@
-version in ThisBuild := "0.2.1-DATEFIX"
+version in ThisBuild := "0.2.1-BRIGADE02"

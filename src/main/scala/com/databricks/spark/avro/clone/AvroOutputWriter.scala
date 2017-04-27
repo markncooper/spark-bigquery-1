@@ -107,9 +107,9 @@ class AvroOutputWriter(
            FloatType | DoubleType | StringType | BooleanType => identity
       case _: DecimalType => (item: Any) => if (item == null) null else item.toString
       case TimestampType => (item: Any) =>
-        if (item == null) null else item.asInstanceOf[Timestamp].getTime
+        if (item == null) null else item.asInstanceOf[Timestamp].getTime * 1000l // MNC: mills -> micros hack.
       case DateType => (item: Any) =>
-        if (item == null) null else item.asInstanceOf[Date].getTime
+        if (item == null) null else item.asInstanceOf[Date].toString
       case ArrayType(elementType, _) =>
         val elementConverter = createConverterToAvro(elementType, structName, recordNamespace)
         (item: Any) => {

@@ -105,17 +105,26 @@ private[bigquery] class BigQueryClient(conf: Configuration) {
   def query(sqlQuery: String): TableReference = queryCache.get(sqlQuery)
 
   /**
+    * Check if the table exists - useful for pre-write logic.
+    */
+  def tableExists(table: TableReference): Boolean = {
+    new BigQueryHelper(bigquery).tableExists(table)
+  }
+
+  /**
    * Load an Avro data set on GCS to a BigQuery table.
    */
   def load(gcsPath: String, destinationTable: TableReference,
            writeDisposition: WriteDisposition.Value = null,
-           createDisposition: CreateDisposition.Value = null): Unit = {
+           createDisposition: CreateDisposition.Value = null,
+           schema: TableSchema = null): Unit = {
     val tableName = BigQueryStrings.toString(destinationTable)
     logger.info(s"Loading $gcsPath into $tableName")
     var loadConfig = new JobConfigurationLoad()
       .setDestinationTable(destinationTable)
       .setSourceFormat("AVRO")
       .setSourceUris(List(gcsPath + "/*.avro").asJava)
+      .setSchema(schema)
     if (writeDisposition != null) {
       loadConfig = loadConfig.setWriteDisposition(writeDisposition.toString)
     }

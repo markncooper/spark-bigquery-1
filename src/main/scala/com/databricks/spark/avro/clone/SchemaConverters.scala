@@ -226,7 +226,7 @@ object SchemaConverters {
       case BinaryType => schemaBuilder.bytesType()
       case BooleanType => schemaBuilder.booleanType()
       case TimestampType => schemaBuilder.longType()
-      case DateType => schemaBuilder.longType()
+      case DateType => schemaBuilder.stringType()
 
       case ArrayType(elementType, _) =>
         val builder = getSchemaBuilder(dataType.asInstanceOf[ArrayType].containsNull)
@@ -270,7 +270,7 @@ object SchemaConverters {
       case BinaryType => newFieldBuilder.bytesType()
       case BooleanType => newFieldBuilder.booleanType()
       case TimestampType => newFieldBuilder.longType()
-      case DateType => newFieldBuilder.longType()
+      case DateType => newFieldBuilder.stringType()
 
       case ArrayType(elementType, _) =>
         val builder = getSchemaBuilder(dataType.asInstanceOf[ArrayType].containsNull)
