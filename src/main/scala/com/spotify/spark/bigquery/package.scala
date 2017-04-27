@@ -17,6 +17,7 @@
 
 package com.spotify.spark
 
+import com.appsflyer.spark.bigquery.BigQuerySchema
 import com.databricks.spark.avro.clone._
 import com.databricks.spark.avro.clone.SchemaConverters
 import com.google.api.services.bigquery.model.{TableReference, TableSchema}
@@ -185,6 +186,26 @@ package object bigquery {
         writeDisposition,
         createDisposition,
         schema)
+
+    /**
+      * Save a [[DataFrame]] to a BigQuery table. Extract the schema definition from
+      * the Dataframe and force BigQuery to use this schema when importing the Avro data.
+      * This has the benefit that Timestamp and Date fields don't get coerced to longs but
+      * instead use the types available in BigQuery.
+      */
+    def saveAsBigQueryTableWithRichSchema(tableSpec: String,
+                            writeDisposition: WriteDisposition.Value = null,
+                            createDisposition: CreateDisposition.Value = null): Unit = {
+
+      val schemaJson = BigQuerySchema(self)
+      val tableSchema = new TableSchema().setFields(BigQueryUtils.getSchemaFromString(schemaJson))
+
+      saveAsBigQueryTable(
+        BigQueryStrings.parseTableReference(tableSpec),
+        writeDisposition,
+        createDisposition,
+        tableSchema)
+    }
 
     private def delete(path: Path): Unit = {
       val fs = FileSystem.get(path.toUri, conf)
